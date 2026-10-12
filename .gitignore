@@ -1,0 +1,9 @@
+target/
+dados/
+*.class
+out/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+.sprint-wip/
