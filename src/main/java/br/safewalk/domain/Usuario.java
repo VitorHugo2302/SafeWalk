@@ -1,5 +1,7 @@
 package br.safewalk.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -23,7 +25,10 @@ public class Usuario {
     }
 
     public String getLogin() { return login; }
+
+    @JsonIgnore
     public String getSenhaHash() { return senhaHash; }
+
     public String getNome() { return nome; }
     public PerfilUsuario getPerfil() { return perfil; }
     public LocalDate getCriadoEm() { return criadoEm; }
