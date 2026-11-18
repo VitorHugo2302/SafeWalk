@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SafeWalk</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="tela-login" class="tela-centro">
+    <div class="caixa">
+        <h1>SafeWalk</h1>
+        <p class="sub">rotas seguras pra pedestres</p>
+
+        <div id="form-login">
+            <h2>entrar</h2>
+            <input id="login-usr" placeholder="login">
+            <input id="login-sen" type="password" placeholder="senha">
+            <button class="primario" onclick="entrar()">entrar</button>
+            <p class="link"><a href="#" onclick="trocarAba('cadastro')">criar conta</a></p>
+        </div>
+
+        <div id="form-cadastro" class="oculto">
+            <h2>cadastrar</h2>
+            <input id="cad-usr" placeholder="login">
+            <input id="cad-sen" type="password" placeholder="senha (min 4)">
+            <input id="cad-nome" placeholder="nome">
+            <button class="primario" onclick="cadastrar()">criar conta</button>
+            <p class="link"><a href="#" onclick="trocarAba('login')">voltar</a></p>
+        </div>
+
+        <p id="aviso-login" class="erro"></p>
+    </div>
+</div>
+
+<div id="tela-app" class="oculto">
+    <header>
+        <div class="marca">SafeWalk</div>
+        <div class="usuario">
+            <button class="texto" onclick="localizarAgora()">localização</button>
+            <span id="nome-usuario"></span>
+            <button class="texto" onclick="sair()">sair</button>
+        </div>
+    </header>
+
+    <aside>
+        <nav>
+            <button data-panel="rotas" onclick="mostrarPanel('rotas')" class="ativo">rotas</button>
+            <button data-panel="tracar" onclick="mostrarPanel('tracar')">traçar</button>
+            <button data-panel="nova-rota" onclick="mostrarPanel('nova-rota')">manual</button>
+            <button data-panel="nova-ocorrencia" onclick="mostrarPanel('nova-ocorrencia')">ocorrência</button>
+            <button data-panel="relatorio" onclick="mostrarPanel('relatorio')">relatório</button>
+        </nav>
+
+        <section id="panel-rotas" class="panel">
+            <h3>minhas rotas</h3>
+            <input id="busca-rota" placeholder="filtrar..." oninput="renderizarRotas()">
+            <ul id="lista-rotas" class="lista"></ul>
+            <div id="detalhe-rota" class="detalhe oculto">
+                <h4 id="dr-nome"></h4>
+                <p id="dr-info"></p>
+                <div id="dr-indice" class="indice"></div>
+                <button class="perigo" onclick="excluirRotaSelecionada()">excluir</button>
+            </div>
+        </section>
+
+        <section id="panel-tracar" class="panel oculto">
+            <h3>traçar rota</h3>
+            <label>origem
+                <input id="tr-origem" placeholder="endereço, bairro, cidade">
+            </label>
+            <button class="secundario" onclick="usarMinhaLocalizacao()">usar minha localização</button>
+
+            <label style="margin-top:12px">destino
+                <input id="tr-destino" placeholder="ex: Av. Paulista, 1000, São Paulo">
+            </label>
+
+            <button class="primario" onclick="tracarRota()">traçar rota a pé</button>
+            <p id="tr-status" class="dica oculto"></p>
+
+            <div id="tr-resumo" class="detalhe oculto">
+                <h4>rota encontrada</h4>
+                <p id="tr-info"></p>
+                <input id="tr-nome" placeholder="dê um nome pra salvar">
+                <label>horário previsto
+                    <input id="tr-horario" type="time" value="08:00">
+                </label>
+                <button class="primario" onclick="salvarRotaTracada()">salvar como minha rota</button>
+                <button class="texto" onclick="limparRotaTracada()">limpar</button>
+            </div>
+        </section>
+
+        <section id="panel-nova-rota" class="panel oculto">
+            <h3>rota manual</h3>
+            <input id="nr-nome" placeholder="nome da rota">
+            <label>horário previsto
+                <input id="nr-horario" type="time" value="08:00">
+            </label>
+            <p class="dica">clique no mapa pra adicionar trechos. nome e bairro são preenchidos no formulário.</p>
+            <ul id="nr-trechos" class="lista"></ul>
+            <button class="primario" onclick="salvarNovaRota()">salvar</button>
+            <button class="texto" onclick="cancelarNovaRota()">cancelar</button>
+        </section>
+
+        <section id="panel-nova-ocorrencia" class="panel oculto">
+            <h3>registrar ocorrência</h3>
+            <label>trecho
+                <select id="oc-trecho"></select>
+            </label>
+            <label>tipo
+                <select id="oc-tipo">
+                    <option value="ASSALTO">assalto</option>
+                    <option value="FURTO">furto</option>
+                    <option value="AGRESSAO">agressão</option>
+                    <option value="ILUMINACAO_RUIM">iluminação ruim</option>
+                    <option value="ACIDENTE_TRANSITO">acidente de trânsito</option>
+                    <option value="VIA_DETERIORADA">via deteriorada</option>
+                </select>
+            </label>
+            <label>data
+                <input id="oc-data" type="date">
+            </label>
+            <input id="oc-desc" placeholder="descrição">
+            <button class="primario" onclick="salvarOcorrencia()">registrar</button>
+        </section>
+
+        <section id="panel-relatorio" class="panel oculto">
+            <h3>relatório</h3>
+            <label>de
+                <input id="rel-inicio" type="date">
+            </label>
+            <label>até
+                <input id="rel-fim" type="date">
+            </label>
+            <button class="primario" onclick="carregarContagem()">contar por tipo</button>
+            <div id="rel-saida"></div>
+            <a href="/api/relatorios/exportar" download="ocorrencias.csv">
+                <button class="secundario">baixar csv</button>
+            </a>
+        </section>
+    </aside>
+
+    <main>
+        <div id="mapa"></div>
+        <div id="legenda">
+            <div><span class="pino rota"></span> rota ativa</div>
+            <div><span class="pino trecho"></span> trecho</div>
+            <div><span class="pino ocorrencia"></span> ocorrência</div>
+            <div><span class="pino minhaloc"></span> você</div>
+            <div><span class="pino tracada"></span> rota traçada</div>
+        </div>
+    </main>
+</div>
+
+<div id="dlg-trecho" class="modal oculto">
+    <div class="caixa">
+        <h3>novo trecho</h3>
+        <input id="dt-via" placeholder="rua / avenida">
+        <input id="dt-bairro" placeholder="bairro">
+        <input id="dt-km" type="number" step="0.01" placeholder="distância em km">
+        <div class="linha">
+            <button class="primario" onclick="confirmarTrecho()">adicionar</button>
+            <button class="texto" onclick="fecharDialogoTrecho()">cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
