@@ -24,6 +24,16 @@ public class AutenticacaoService {
         return u;
     }
 
+    public boolean validar(String login, String senha) {
+        return repo.buscar(login)
+                .map(u -> u.getSenhaHash().equals(hash(senha)))
+                .orElse(false);
+    }
+
+    public Optional<Usuario> buscarUsuario(String login) {
+        return repo.buscar(login);
+    }
+
     public boolean entrar(String login, String senha) {
         Optional<Usuario> ou = repo.buscar(login);
         if (ou.isEmpty()) return false;
