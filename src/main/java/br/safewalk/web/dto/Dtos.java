@@ -14,7 +14,8 @@ public final class Dtos {
 
     public record NovaRotaRequest(String nome, String horario, List<TrechoRequest> trechos) {}
 
-    public record NovaOcorrenciaRequest(String trechoId, String tipo, String data, String descricao) {}
+    public record NovaOcorrenciaRequest(String trechoId, String tipo, String data, String descricao,
+                                        Double lat, Double lng) {}
 
     public record Mensagem(String mensagem) {}
 }

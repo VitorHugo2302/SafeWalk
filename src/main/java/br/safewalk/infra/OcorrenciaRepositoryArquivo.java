@@ -28,11 +28,14 @@ public class OcorrenciaRepositoryArquivo implements OcorrenciaRepository {
             for (String linha : Files.readAllLines(arquivo)) {
                 if (linha.isBlank()) continue;
                 String[] p = linha.split(";", -1);
+                double lat = p.length > 6 ? Double.parseDouble(p[6]) : 0;
+                double lng = p.length > 7 ? Double.parseDouble(p[7]) : 0;
                 Ocorrencia o = new Ocorrencia(
                         p[0], p[1],
                         TipoOcorrencia.valueOf(p[2]),
                         LocalDate.parse(p[3]),
-                        p[4], p[5]);
+                        p[4], p[5],
+                        lat, lng);
                 cache.put(o.getId(), o);
             }
         } catch (IOException e) {
@@ -49,7 +52,9 @@ public class OcorrenciaRepositoryArquivo implements OcorrenciaRepository {
                   .append(o.getTipo().name()).append(';')
                   .append(o.getData()).append(';')
                   .append(o.getDescricao().replace(';', ',').replace('\n', ' ')).append(';')
-                  .append(o.getReportadoPor()).append('\n');
+                  .append(o.getReportadoPor()).append(';')
+                  .append(o.getLat()).append(';')
+                  .append(o.getLng()).append('\n');
             }
             if (arquivo.getParent() != null) Files.createDirectories(arquivo.getParent());
             Files.writeString(arquivo, sb.toString());

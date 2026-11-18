@@ -17,14 +17,22 @@ public class OcorrenciaService {
         this.repo = repo;
     }
 
-    public Ocorrencia registrar(Usuario autor, String trechoId, TipoOcorrencia tipo, LocalDate data, String descricao) {
-        if (trechoId == null || trechoId.isBlank()) throw new IllegalArgumentException("trecho obrigatorio");
+    public Ocorrencia registrar(Usuario autor, String trechoId, TipoOcorrencia tipo,
+                                LocalDate data, String descricao, double lat, double lng) {
         if (data == null) throw new IllegalArgumentException("data obrigatoria");
         if (data.isAfter(LocalDate.now())) throw new IllegalArgumentException("data no futuro");
+        boolean temTrecho = trechoId != null && !trechoId.isBlank();
+        boolean temCoord = lat != 0 || lng != 0;
+        if (!temTrecho && !temCoord) throw new IllegalArgumentException("informe trecho ou coordenada");
         String id = UUID.randomUUID().toString().substring(0, 8);
-        Ocorrencia o = new Ocorrencia(id, trechoId, tipo, data, descricao, autor.getLogin());
+        Ocorrencia o = new Ocorrencia(id, temTrecho ? trechoId : "", tipo, data, descricao, autor.getLogin(), lat, lng);
         repo.salvar(o);
         return o;
+    }
+
+    public Ocorrencia registrar(Usuario autor, String trechoId, TipoOcorrencia tipo,
+                                LocalDate data, String descricao) {
+        return registrar(autor, trechoId, tipo, data, descricao, 0, 0);
     }
 
     public List<Ocorrencia> listar() {

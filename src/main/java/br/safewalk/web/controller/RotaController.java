@@ -63,7 +63,7 @@ public class RotaController {
     }
 
     @GetMapping
-    public ResponseEntity<?> listar(@RequestParam(defaultValue = "minhas") String escopo, HttpSession session) {
+    public ResponseEntity<?> listar(@RequestParam(name = "escopo", defaultValue = "minhas") String escopo, HttpSession session) {
         Usuario u = usuario(session);
         if (u == null) return ResponseEntity.status(401).body(new Mensagem("nao autenticado"));
         List<Rota> ls = escopo.equals("todas") ? rotas.listarTodas() : rotas.listarDoUsuario(u.getLogin());
@@ -71,13 +71,13 @@ public class RotaController {
     }
 
     @GetMapping("/buscar")
-    public ResponseEntity<?> buscar(@RequestParam String q, HttpSession session) {
+    public ResponseEntity<?> buscar(@RequestParam(name = "q") String q, HttpSession session) {
         if (usuario(session) == null) return ResponseEntity.status(401).body(new Mensagem("nao autenticado"));
         return ResponseEntity.ok(rotas.buscarPorNome(q));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> detalhe(@PathVariable String id, HttpSession session) {
+    public ResponseEntity<?> detalhe(@PathVariable("id") String id, HttpSession session) {
         if (usuario(session) == null) return ResponseEntity.status(401).body(new Mensagem("nao autenticado"));
         Rota r = rotas.buscar(id);
         if (r == null) return ResponseEntity.notFound().build();
@@ -85,7 +85,7 @@ public class RotaController {
     }
 
     @GetMapping("/{id}/indice")
-    public ResponseEntity<?> indice(@PathVariable String id, HttpSession session) {
+    public ResponseEntity<?> indice(@PathVariable("id") String id, HttpSession session) {
         if (usuario(session) == null) return ResponseEntity.status(401).body(new Mensagem("nao autenticado"));
         Rota r = rotas.buscar(id);
         if (r == null) return ResponseEntity.notFound().build();
@@ -94,7 +94,7 @@ public class RotaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> excluir(@PathVariable String id, HttpSession session) {
+    public ResponseEntity<?> excluir(@PathVariable("id") String id, HttpSession session) {
         Usuario u = usuario(session);
         if (u == null) return ResponseEntity.status(401).body(new Mensagem("nao autenticado"));
         try {

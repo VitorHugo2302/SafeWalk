@@ -39,10 +39,12 @@ public class OcorrenciaController {
         Usuario u = usuario(session);
         if (u == null) return ResponseEntity.status(401).body(new Mensagem("nao autenticado"));
         try {
+            double lat = req.lat() != null ? req.lat() : 0;
+            double lng = req.lng() != null ? req.lng() : 0;
             Ocorrencia o = svc.registrar(u, req.trechoId(),
                     TipoOcorrencia.valueOf(req.tipo()),
                     LocalDate.parse(req.data()),
-                    req.descricao());
+                    req.descricao(), lat, lng);
             return ResponseEntity.ok(o);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new Mensagem(e.getMessage()));
@@ -50,9 +52,9 @@ public class OcorrenciaController {
     }
 
     @GetMapping
-    public ResponseEntity<?> listar(@RequestParam(required = false) String tipo,
-                                    @RequestParam(required = false) String inicio,
-                                    @RequestParam(required = false) String fim,
+    public ResponseEntity<?> listar(@RequestParam(name = "tipo", required = false) String tipo,
+                                    @RequestParam(name = "inicio", required = false) String inicio,
+                                    @RequestParam(name = "fim", required = false) String fim,
                                     HttpSession session) {
         if (usuario(session) == null) return ResponseEntity.status(401).body(new Mensagem("nao autenticado"));
         TipoOcorrencia t = null;
@@ -68,7 +70,7 @@ public class OcorrenciaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> excluir(@PathVariable String id, HttpSession session) {
+    public ResponseEntity<?> excluir(@PathVariable("id") String id, HttpSession session) {
         Usuario u = usuario(session);
         if (u == null) return ResponseEntity.status(401).body(new Mensagem("nao autenticado"));
         try {

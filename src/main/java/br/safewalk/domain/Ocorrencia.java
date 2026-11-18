@@ -9,14 +9,24 @@ public class Ocorrencia {
     private LocalDate data;
     private String descricao;
     private String reportadoPor;
+    private double lat;
+    private double lng;
 
-    public Ocorrencia(String id, String trechoId, TipoOcorrencia tipo, LocalDate data, String descricao, String reportadoPor) {
+    public Ocorrencia(String id, String trechoId, TipoOcorrencia tipo, LocalDate data,
+                      String descricao, String reportadoPor, double lat, double lng) {
         this.id = id;
-        this.trechoId = trechoId;
+        this.trechoId = trechoId == null ? "" : trechoId;
         this.tipo = tipo;
         this.data = data;
         this.descricao = descricao == null ? "" : descricao;
         this.reportadoPor = reportadoPor;
+        this.lat = lat;
+        this.lng = lng;
+    }
+
+    public Ocorrencia(String id, String trechoId, TipoOcorrencia tipo, LocalDate data,
+                      String descricao, String reportadoPor) {
+        this(id, trechoId, tipo, data, descricao, reportadoPor, 0, 0);
     }
 
     public String getId() { return id; }
@@ -25,4 +35,6 @@ public class Ocorrencia {
     public LocalDate getData() { return data; }
     public String getDescricao() { return descricao; }
     public String getReportadoPor() { return reportadoPor; }
+    public double getLat() { return lat; }
+    public double getLng() { return lng; }
 }

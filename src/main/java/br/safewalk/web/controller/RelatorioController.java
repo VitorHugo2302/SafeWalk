@@ -28,8 +28,8 @@ public class RelatorioController {
     }
 
     @GetMapping("/contagem")
-    public ResponseEntity<?> contagem(@RequestParam(required = false) String inicio,
-                                      @RequestParam(required = false) String fim,
+    public ResponseEntity<?> contagem(@RequestParam(name = "inicio", required = false) String inicio,
+                                      @RequestParam(name = "fim", required = false) String fim,
                                       HttpSession session) {
         if (session.getAttribute("login") == null) {
             return ResponseEntity.status(401).body(new Mensagem("nao autenticado"));
