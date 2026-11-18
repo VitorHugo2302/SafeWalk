@@ -36,133 +36,176 @@
 </div>
 
 <div id="tela-app" class="oculto">
-    <header>
-        <div class="marca">SafeWalk</div>
-        <div class="usuario">
-            <button class="texto" onclick="localizarAgora()">localização</button>
-            <span id="nome-usuario"></span>
-            <button class="texto" onclick="sair()">sair</button>
+    <div class="barra-topo">
+        <button class="icone-btn" onclick="abrirDrawer()" aria-label="menu">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+        </button>
+        <div class="busca">
+            <svg viewBox="0 0 24 24" width="18" height="18" class="icone-busca">
+                <path fill="#6b7280" d="M15.5 14h-.79l-.28-.27A6.5 6.5 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/>
+            </svg>
+            <input id="busca-destino" placeholder="Para onde você vai?" autocomplete="off">
+            <button class="limpar oculto" id="btn-limpar" onclick="limparBusca()" aria-label="limpar">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+            <div id="sugestoes" class="sugestoes oculto"></div>
         </div>
-    </header>
+        <button class="icone-btn gps" onclick="localizarAgora()" aria-label="minha localização" title="minha localização">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+        </button>
+    </div>
 
-    <aside>
-        <nav>
-            <button data-panel="rotas" onclick="mostrarPanel('rotas')" class="ativo">rotas</button>
-            <button data-panel="tracar" onclick="mostrarPanel('tracar')">traçar</button>
-            <button data-panel="nova-rota" onclick="mostrarPanel('nova-rota')">manual</button>
-            <button data-panel="nova-ocorrencia" onclick="mostrarPanel('nova-ocorrencia')">ocorrência</button>
-            <button data-panel="relatorio" onclick="mostrarPanel('relatorio')">relatório</button>
+    <div id="mapa"></div>
+
+    <div id="painel-inferior" class="oculto">
+        <div class="painel-header">
+            <div>
+                <small>para</small>
+                <strong id="destino-titulo"></strong>
+            </div>
+            <button class="icone-btn" onclick="limparBusca()" aria-label="fechar">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+        </div>
+        <div id="cards-rotas" class="cards-rotas"></div>
+    </div>
+
+    <div id="drawer-backdrop" class="oculto" onclick="fecharDrawer()"></div>
+
+    <aside id="drawer" class="oculto">
+        <div class="drawer-usuario">
+            <div class="avatar"><span id="inicial-usuario"></span></div>
+            <div class="info-usuario">
+                <strong id="nome-usuario"></strong>
+                <small id="login-usuario"></small>
+            </div>
+            <button class="icone-btn" onclick="fecharDrawer()" aria-label="fechar">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+        </div>
+
+        <nav class="drawer-nav">
+            <button class="item-nav" onclick="abrirSecao('rotas')">
+                <span class="icone-item">🗺️</span> Minhas rotas salvas
+            </button>
+            <button class="item-nav" onclick="abrirSecao('ocorrencia')">
+                <span class="icone-item">⚠️</span> Reportar ocorrência
+            </button>
+            <button class="item-nav" onclick="abrirSecao('relatorio')">
+                <span class="icone-item">📊</span> Relatório
+            </button>
+            <button class="item-nav" onclick="abrirSecao('emergencia')">
+                <span class="icone-item">🆘</span> Contato de emergência
+            </button>
+            <hr>
+            <button class="item-nav sair" onclick="sair()">
+                <span class="icone-item">↩️</span> Sair
+            </button>
         </nav>
 
-        <section id="panel-rotas" class="panel">
-            <h3>minhas rotas</h3>
-            <input id="busca-rota" placeholder="filtrar..." oninput="renderizarRotas()">
+        <section id="secao-rotas" class="drawer-secao oculto">
+            <h3>Minhas rotas</h3>
+            <p class="dica">Rotas que você salvou. Clique numa pra ver detalhes.</p>
             <ul id="lista-rotas" class="lista"></ul>
             <div id="detalhe-rota" class="detalhe oculto">
                 <h4 id="dr-nome"></h4>
                 <p id="dr-info"></p>
-                <div id="dr-indice" class="indice"></div>
-                <button class="perigo" onclick="excluirRotaSelecionada()">excluir</button>
+                <div id="dr-indice" class="badge-indice"></div>
+                <button class="perigo" onclick="excluirRotaSelecionada()">Excluir rota</button>
             </div>
         </section>
 
-        <section id="panel-tracar" class="panel oculto">
-            <h3>traçar rota</h3>
-            <label>origem
-                <input id="tr-origem" placeholder="endereço, bairro, cidade">
-            </label>
-            <button class="secundario" onclick="usarMinhaLocalizacao()">usar minha localização</button>
-
-            <label style="margin-top:12px">destino
-                <input id="tr-destino" placeholder="ex: Av. Paulista, 1000, São Paulo">
-            </label>
-
-            <button class="primario" onclick="tracarRota()">traçar rota a pé</button>
-            <p id="tr-status" class="dica oculto"></p>
-
-            <div id="tr-resumo" class="detalhe oculto">
-                <h4>rota encontrada</h4>
-                <p id="tr-info"></p>
-                <input id="tr-nome" placeholder="dê um nome pra salvar">
-                <label>horário previsto
-                    <input id="tr-horario" type="time" value="08:00">
-                </label>
-                <button class="primario" onclick="salvarRotaTracada()">salvar como minha rota</button>
-                <button class="texto" onclick="limparRotaTracada()">limpar</button>
-            </div>
-        </section>
-
-        <section id="panel-nova-rota" class="panel oculto">
-            <h3>rota manual</h3>
-            <input id="nr-nome" placeholder="nome da rota">
-            <label>horário previsto
-                <input id="nr-horario" type="time" value="08:00">
-            </label>
-            <p class="dica">clique no mapa pra adicionar trechos. nome e bairro são preenchidos no formulário.</p>
-            <ul id="nr-trechos" class="lista"></ul>
-            <button class="primario" onclick="salvarNovaRota()">salvar</button>
-            <button class="texto" onclick="cancelarNovaRota()">cancelar</button>
-        </section>
-
-        <section id="panel-nova-ocorrencia" class="panel oculto">
-            <h3>registrar ocorrência</h3>
-            <label>trecho
-                <select id="oc-trecho"></select>
-            </label>
-            <label>tipo
+        <section id="secao-ocorrencia" class="drawer-secao oculto">
+            <h3>Reportar ocorrência</h3>
+            <p class="dica">Clique num ponto do mapa pra marcar onde foi.</p>
+            <div id="oc-ponto-info" class="info-ponto oculto"></div>
+            <label>Tipo
                 <select id="oc-tipo">
-                    <option value="ASSALTO">assalto</option>
-                    <option value="FURTO">furto</option>
-                    <option value="AGRESSAO">agressão</option>
-                    <option value="ILUMINACAO_RUIM">iluminação ruim</option>
-                    <option value="ACIDENTE_TRANSITO">acidente de trânsito</option>
-                    <option value="VIA_DETERIORADA">via deteriorada</option>
+                    <option value="ASSALTO">Assalto</option>
+                    <option value="FURTO">Furto</option>
+                    <option value="AGRESSAO">Agressão</option>
+                    <option value="ILUMINACAO_RUIM">Iluminação ruim</option>
+                    <option value="ACIDENTE_TRANSITO">Acidente de trânsito</option>
+                    <option value="VIA_DETERIORADA">Via deteriorada</option>
                 </select>
             </label>
-            <label>data
+            <label>Data
                 <input id="oc-data" type="date">
             </label>
-            <input id="oc-desc" placeholder="descrição">
-            <button class="primario" onclick="salvarOcorrencia()">registrar</button>
+            <input id="oc-desc" placeholder="O que aconteceu? (opcional)">
+            <button class="primario" onclick="salvarOcorrenciaPonto()">Registrar</button>
+            <button class="texto" onclick="cancelarOcorrencia()">Cancelar</button>
         </section>
 
-        <section id="panel-relatorio" class="panel oculto">
-            <h3>relatório</h3>
-            <label>de
+        <section id="secao-relatorio" class="drawer-secao oculto">
+            <h3>Relatório</h3>
+            <label>De
                 <input id="rel-inicio" type="date">
             </label>
-            <label>até
+            <label>Até
                 <input id="rel-fim" type="date">
             </label>
-            <button class="primario" onclick="carregarContagem()">contar por tipo</button>
-            <div id="rel-saida"></div>
+            <button class="primario" onclick="carregarContagem()">Contar por tipo</button>
+            <div id="rel-saida" class="saida-relatorio"></div>
             <a href="/api/relatorios/exportar" download="ocorrencias.csv">
-                <button class="secundario">baixar csv</button>
+                <button class="secundario">Baixar CSV</button>
             </a>
+        </section>
+
+        <section id="secao-emergencia" class="drawer-secao oculto">
+            <h3>Contato de emergência</h3>
+            <p class="dica">Esse contato vai receber sua localização quando você acionar o botão SOS.</p>
+            <label>Nome
+                <input id="ce-nome" placeholder="ex: Maria (mãe)">
+            </label>
+            <label>Telefone
+                <input id="ce-telefone" placeholder="ex: (31) 99999-9999">
+            </label>
+            <button class="primario" onclick="salvarContatoEmergencia()">Salvar contato</button>
         </section>
     </aside>
 
-    <main>
-        <div id="mapa"></div>
-        <div id="legenda">
-            <div><span class="pino rota"></span> rota ativa</div>
-            <div><span class="pino trecho"></span> trecho</div>
-            <div><span class="pino ocorrencia"></span> ocorrência</div>
-            <div><span class="pino minhaloc"></span> você</div>
-            <div><span class="pino tracada"></span> rota traçada</div>
-        </div>
-    </main>
-</div>
+    <button id="fab-reportar" class="fab" onclick="abrirReportarAqui()" title="Reportar neste local">
+        <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 2 1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>
+    </button>
 
-<div id="dlg-trecho" class="modal oculto">
-    <div class="caixa">
-        <h3>novo trecho</h3>
-        <input id="dt-via" placeholder="rua / avenida">
-        <input id="dt-bairro" placeholder="bairro">
-        <input id="dt-km" type="number" step="0.01" placeholder="distância em km">
-        <div class="linha">
-            <button class="primario" onclick="confirmarTrecho()">adicionar</button>
-            <button class="texto" onclick="fecharDialogoTrecho()">cancelar</button>
+    <button id="fab-sos" class="fab-sos" onclick="abrirSOS()" title="Emergência">
+        <span>SOS</span>
+    </button>
+
+    <div id="modal-sos" class="modal-sos oculto">
+        <div class="caixa-sos">
+            <div id="sos-confirmacao">
+                <div class="sos-icone">🆘</div>
+                <h2>Acionar emergência?</h2>
+                <p class="sos-sub">Vamos enviar sua localização ao contato de emergência e acionar a polícia.</p>
+                <button class="btn-sos-confirmar" onclick="confirmarSOS()">
+                    Confirmar emergência
+                </button>
+                <button class="btn-sos-cancelar" onclick="fecharSOS()">Cancelar</button>
+            </div>
+
+            <div id="sos-progresso" class="oculto">
+                <div class="sos-pulso"><div class="sos-icone-grande">🆘</div></div>
+                <h2>Emergência acionada</h2>
+                <ul class="sos-passos">
+                    <li id="passo-loc"><span class="sos-check"></span> Obtendo sua localização</li>
+                    <li id="passo-msg"><span class="sos-check"></span> Enviando mensagem ao contato</li>
+                    <li id="passo-pol"><span class="sos-check"></span> Ligando para a polícia (190)</li>
+                </ul>
+                <div id="sos-mensagem-preview" class="sos-preview oculto"></div>
+                <div id="sos-ligacao" class="sos-ligacao oculto">
+                    <div class="sos-fone">📞</div>
+                    <div>
+                        <strong>Polícia Militar</strong>
+                        <div class="sos-numero">190</div>
+                        <small id="sos-timer">chamando...</small>
+                    </div>
+                </div>
+                <button class="btn-sos-cancelar" onclick="fecharSOS()">Encerrar</button>
+            </div>
+
+            <div class="selo-demo">modo demonstração — nada é enviado de verdade</div>
         </div>
     </div>
 </div>
