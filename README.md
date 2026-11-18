@@ -1,125 +1,58 @@
 # SafeWalk
 
-Plataforma de rotas seguras para pedestres que combina mapas interativos com dados de ocorrências reportadas pela comunidade. Antes de sair de casa, o usuário consegue consultar o índice de segurança de uma rota, visualizar ocorrências próximas (assaltos, furtos, iluminação ruim, acidentes) e escolher caminhos melhores. O sistema é gratuito, não depende de APIs pagas e usa OpenStreetMap. Projeto desenvolvido para a disciplina de Gestão e Qualidade de Software seguindo metodologia Scrum.
+Plataforma web de rotas seguras para pedestres com mapa interativo (OpenStreetMap via Leaflet). Permite cadastrar rotas, registrar ocorrências por trecho e calcular um índice de segurança combinando peso por tipo, decaimento temporal e horário da rota.
 
-## Problema e público-alvo
-
-Pedestres não têm uma forma simples e padronizada de comparar o risco entre dois caminhos antes de sair de casa. Informações sobre segurança urbana ficam espalhadas em redes sociais e grupos de bairro.
-
-**Público-alvo:** estudantes, trabalhadores, entregadores e moradores de áreas urbanas que se deslocam a pé.
-
-Detalhes em [docs/visao.md](docs/visao.md).
-
-## Funcionalidades
-
-1. Cadastro e autenticação de usuário (hash SHA-256)
-2. Cadastro, listagem, busca e exclusão de rotas com múltiplos trechos
-3. Registro de ocorrências georreferenciadas por trecho
-4. Filtro de ocorrências por tipo e período
-5. Cálculo de índice de segurança (score 0..100, classes A..E) com decaimento temporal e multiplicador noturno
-6. Visualização em mapa interativo (OpenStreetMap/Leaflet)
-7. Geolocalização atual do usuário
-8. Busca de endereço (Nominatim) e traçado automático de rota a pé (OSRM)
-9. Relatórios de contagem por tipo e exportação CSV
-
-Lista completa com critérios em [docs/requisitos/requisitos-funcionais.md](docs/requisitos/requisitos-funcionais.md).
-
-## Tecnologias
-
-- **Linguagem:** Java 17
-- **Build:** Maven 3.9+
-- **Testes unitários:** JUnit 5
-- **BDD:** Cucumber
-- **Interface web (Sprint 2+):** Spring Boot
-- **Mapa:** Leaflet.js + OpenStreetMap
-- **Geocodificação:** Nominatim
-- **Roteamento a pé:** OSRM (Open Source Routing Machine)
-- **Persistência:** arquivos CSV em `./dados/`
-
-## Como executar
+## Rodar
 
 Pré-requisitos: JDK 17 e Maven 3.9+.
 
-```bash
-mvn package
-java -jar target/safewalk.jar
-```
+    mvn package
+    java -jar target/safewalk.jar
 
-A partir da Sprint 2, a interface web sobe em http://localhost:8080.
+A aplicação sobe em http://localhost:8080.
 
-## Como rodar os testes
+## Modo console (opcional)
 
-```bash
-mvn test
-```
+A camada de console original foi mantida. Para rodar sem o servidor web:
 
-Relatório de cobertura (quando configurado nas Sprints 1+):
+    mvn -q compile exec:java -Dexec.mainClass=br.safewalk.App
 
-```bash
-mvn verify
-# relatório em target/site/jacoco/index.html
-```
+## Estrutura (5 camadas)
 
-Cenários BDD (a partir da Sprint 2):
+- `br.safewalk.domain` — entidades e regras (Usuario, Rota, Trecho, Ocorrencia, Periodo, IndiceSeguranca, TipoOcorrencia, PerfilUsuario)
+- `br.safewalk.service` — casos de uso (Autenticacao, Rota, Ocorrencia, Relatorio, CalculadoraIndice)
+- `br.safewalk.infra` — persistência em arquivo CSV (interfaces + implementações)
+- `br.safewalk.ui` — menu de console (modo alternativo)
+- `br.safewalk.web` — Spring Boot (WebApp, config, controllers, dtos)
 
-```bash
-mvn test -Dcucumber.filter.tags="@sprint-2"
-```
+Frontend em `src/main/resources/static` (HTML + Leaflet + JS puro).
 
-## Estrutura de pastas
+## Funcionalidades
 
-```
-.
-├── docs/
-│   ├── visao.md                      Visão do produto
-│   ├── backlog.md                    Backlog priorizado
-│   ├── arquitetura.md                Arquitetura em camadas e ADRs
-│   ├── requisitos/
-│   │   ├── requisitos-funcionais.md
-│   │   └── requisitos-nao-funcionais.md
-│   └── testes/
-│       ├── plano-de-teste.md
-│       ├── roteiros-de-teste.md
-│       ├── usabilidade.md
-│       └── evidencias/               Prints, logs, relatórios
-├── slides/                           Apresentação final
-├── src/
-│   ├── main/
-│   │   ├── java/br/safewalk/
-│   │   │   ├── App.java              Entry point CLI
-│   │   │   ├── domain/               Entidades e regras puras
-│   │   │   ├── service/              Casos de uso
-│   │   │   ├── infra/                Persistência (CSV)
-│   │   │   ├── ui/                   Interface de console
-│   │   │   └── web/                  Interface web (Spring Boot, Sprint 2+)
-│   │   └── resources/                Recursos web e config (Sprint 2+)
-│   └── test/
-│       ├── java/                     Testes JUnit 5
-│       └── resources/features/       Cenários Gherkin Cucumber
-├── pom.xml
-└── README.md
-```
+1. Cadastro e login de usuário (SHA-256 + sessão HTTP)
+2. Criação de rota clicando no mapa para marcar trechos
+3. Visualização das rotas no mapa (próprias e de outros usuários)
+4. Registro de ocorrência vinculada a um trecho
+5. Avaliação do índice de segurança da rota (A..E)
+6. Relatório de contagem por tipo + filtro de período
+7. Exportação CSV
+8. Exclusão com permissão por autor/moderador
+9. Busca/filtro de rotas por nome
 
-## Metodologia e sprints
+## Regra de negócio não-trivial
 
-| Sprint | Entregável principal | Status |
-|--------|---------------------|--------|
-| 0 | Setup, visão, backlog, arquitetura, autenticação | ✅ |
-| 1 | MVP com CRUD de rotas e ocorrências + testes JUnit iniciais + HUB (Pré-Projeto, Canvas) | 🔄 |
-| 2 | Mapa + geolocalização + rota traçada + 5 cenários BDD + Relatório + Pitch | 📋 |
-| 3 | Estabilização, cobertura ≥ 80%, 5 roteiros manuais, usabilidade com 3 participantes, slides | 📋 |
+O índice de segurança em `service/CalculadoraIndice` combina:
 
-## Integrantes e papéis
+- peso base por tipo de ocorrência (assalto > agressão > furto > acidente > iluminação > via)
+- decaimento temporal: `max(0.15, 1 - dias/730)` — uma ocorrência de 2 anos atrás pesa 15%
+- densidade por km dos trechos da rota
+- multiplicador de 1.3 se a rota for noturna (19h–6h)
+- normalização em score 0..100 e classificação em faixas A/B/C/D/E
 
-| Integrante | Papel Scrum | Responsabilidade |
-|------------|-------------|------------------|
-| Vitor Hugo | *(a definir)* | *(a definir)* |
-| Tiago Lucas | *(a definir)* | *(a definir)* |
-| Arthur Silva | *(a definir)* | *(a definir)* |
-| Helder | *(a definir)* | *(a definir)* |
+## Persistência
 
-Sugestão de distribuição Scrum para 4 pessoas: 1 Product Owner, 1 Scrum Master, 2 Desenvolvedores.
+Arquivos CSV criados no diretório `dados/` ao executar.
 
-## Licença
+## Mapa
 
-Este projeto é acadêmico, desenvolvido para a disciplina de Gestão e Qualidade de Software. Uso livre para fins educacionais.
+OpenStreetMap renderizado pelo Leaflet 1.9.4 (CDN). Sem chave de API, sem conta externa, sem custo.
